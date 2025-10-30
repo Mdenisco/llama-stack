@@ -80,7 +80,7 @@ const mockFiles = [
     type: "spreadsheet", 
     size: "1.2 MB",
     uploadedAt: "2024-01-13T09:15:00Z",
-    status: "ready",
+    status: "uploaded",
     vectorStoreId: null,
     chunks: 0,
     vectorStoreCount: 0
@@ -157,8 +157,8 @@ const getStatusBadge = (status: string) => {
       return <Badge variant="default" className="bg-green-100 text-green-800">Processed</Badge>;
     case "processing":
       return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Processing</Badge>;
-    case "ready":
-      return <Badge variant="outline" className="bg-blue-100 text-blue-800">Ready</Badge>;
+    case "uploaded":
+      return <Badge variant="outline" className="bg-blue-100 text-blue-800">Uploaded</Badge>;
     case "uploading":
       return <Badge variant="secondary" className="bg-purple-100 text-purple-800">Uploading</Badge>;
     case "error":
