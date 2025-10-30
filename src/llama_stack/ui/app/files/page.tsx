@@ -43,7 +43,6 @@ import {
   File, 
   Download,
   Trash2,
-  Eye,
   Calendar,
   HardDrive,
   Plus,
@@ -82,10 +81,10 @@ const mockFiles = [
     type: "spreadsheet", 
     size: "1.2 MB",
     uploadedAt: "2024-01-13T09:15:00Z",
-    status: "processed",
-    vectorStoreId: "vs_4x5y6z7a8b9c1d",
-    chunks: 23,
-    vectorStoreCount: 3
+    status: "ready",
+    vectorStoreId: null,
+    chunks: 0,
+    vectorStoreCount: 0
   },
   {
     id: "file_9t8u7v6w5x4y",
@@ -93,10 +92,10 @@ const mockFiles = [
     type: "image",
     size: "3.1 MB", 
     uploadedAt: "2024-01-12T16:45:00Z",
-    status: "processed",
-    vectorStoreId: "vs_7a8b9c2d1e3f4g",
-    chunks: 12,
-    vectorStoreCount: 1
+    status: "uploading",
+    vectorStoreId: null,
+    chunks: 0,
+    vectorStoreCount: 0
   },
   {
     id: "file_3z2a1b4c5d6e",
@@ -173,6 +172,10 @@ const getStatusBadge = (status: string) => {
       return <Badge variant="default" className="bg-green-100 text-green-800">Processed</Badge>;
     case "processing":
       return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Processing</Badge>;
+    case "ready":
+      return <Badge variant="outline" className="bg-blue-100 text-blue-800">Ready</Badge>;
+    case "uploading":
+      return <Badge variant="secondary" className="bg-purple-100 text-purple-800">Uploading</Badge>;
     case "error":
       return <Badge variant="destructive">Error</Badge>;
     default:
@@ -189,6 +192,7 @@ export default function FilesPage() {
   const [selectedVectorStore, setSelectedVectorStore] = useState<string>("");
   const [isVectorStoresListModalOpen, setIsVectorStoresListModalOpen] = useState(false);
   const [selectedFileForVectorStores, setSelectedFileForVectorStores] = useState<string>("");
+  const [selectedVectorStoreToAdd, setSelectedVectorStoreToAdd] = useState<string>("");
 
   // Check if backend is connected
   useEffect(() => {
@@ -212,10 +216,7 @@ export default function FilesPage() {
     alert("File upload functionality would be implemented here when backend is connected");
   };
 
-  const handleViewFile = (fileId: string) => {
-    // Placeholder for viewing file details
-    alert(`View file ${fileId} - would show file details and chunks`);
-  };
+  // Removed view file handler per request
 
   const handleDeleteFile = (fileId: string) => {
     setFiles(files.filter(file => file.id !== fileId));
@@ -229,6 +230,35 @@ export default function FilesPage() {
   const handleViewVectorStores = (fileId: string) => {
     setSelectedFileForVectorStores(fileId);
     setIsVectorStoresListModalOpen(true);
+  };
+
+  const handleAddVectorStoreToFile = (vectorStoreId: string) => {
+    if (!selectedFileForVectorStores || !vectorStoreId) return;
+    
+    // Find the vector store details
+    const vectorStore = mockVectorStores.find(vs => vs.id === vectorStoreId);
+    if (!vectorStore) return;
+
+    // Add to the file's vector stores
+    const newVectorStoreEntry = {
+      id: vectorStoreId,
+      name: vectorStore.name,
+      addedAt: new Date().toISOString(),
+      chunks: 0 // Will be processed
+    };
+
+    // Update the file's vector store count
+    const updatedFiles = files.map(file => 
+      file.id === selectedFileForVectorStores 
+        ? { ...file, vectorStoreCount: file.vectorStoreCount + 1 }
+        : file
+    );
+
+    setFiles(updatedFiles);
+    setSelectedVectorStoreToAdd("");
+    
+    // Show success message (in a real app, you might want to show a toast)
+    alert(`Added ${vectorStore.name} to file successfully! The file will now show ${updatedFiles.find(f => f.id === selectedFileForVectorStores)?.vectorStoreCount} vector stores.`);
   };
 
   const handleSelectFile = (fileId: string, checked: boolean) => {
@@ -429,14 +459,6 @@ export default function FilesPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleViewFile(file.id)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -548,12 +570,38 @@ export default function FilesPage() {
 
         {/* Vector Stores List Modal */}
         <Dialog open={isVectorStoresListModalOpen} onOpenChange={setIsVectorStoresListModalOpen}>
-          <DialogContent className="sm:max-w-[600px]">
+          <DialogContent className="sm:max-w-[600px]" hideCloseButton>
             <DialogHeader>
-              <DialogTitle>Vector Stores for File</DialogTitle>
-              <DialogDescription>
-                Vector stores containing this file and their details.
-              </DialogDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <DialogTitle>Vector Stores for File</DialogTitle>
+                  <DialogDescription>
+                    Vector stores containing this file and their details.
+                  </DialogDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Select 
+                    value={selectedVectorStoreToAdd} 
+                    onValueChange={handleAddVectorStoreToFile}
+                  >
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Add new vector store" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mockVectorStores.map((store) => (
+                        <SelectItem key={store.id} value={store.id}>
+                          <div className="flex items-center justify-between w-full">
+                            <span>{store.name}</span>
+                            <span className="text-sm text-gray-500 ml-2">
+                              ({store.fileCount} files)
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               {selectedFileForVectorStores && mockFileVectorStores[selectedFileForVectorStores as keyof typeof mockFileVectorStores]?.length > 0 ? (
