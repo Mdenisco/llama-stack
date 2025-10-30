@@ -42,6 +42,7 @@ import {
   
   Download,
   Trash2,
+  Eye,
   Calendar,
   HardDrive,
   Plus,
@@ -201,7 +202,10 @@ export default function FilesPage() {
     alert("File upload functionality would be implemented here when backend is connected");
   };
 
-  // Removed view file handler per request
+  const handleViewFile = (fileId: string) => {
+    // Placeholder for viewing file details
+    alert(`View file ${fileId} - would show file details and chunks`);
+  };
 
   const handleDeleteFile = (fileId: string) => {
     setFiles(files.filter(file => file.id !== fileId));
@@ -441,6 +445,14 @@ export default function FilesPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewFile(file.id)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
