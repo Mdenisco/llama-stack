@@ -39,8 +39,7 @@ import {
   Upload, 
   Search, 
   FileText, 
-  Image, 
-  File, 
+  
   Download,
   Trash2,
   Calendar,
@@ -150,21 +149,7 @@ const mockFileVectorStores = {
   "file_3z2a1b4c5d6e": []
 };
 
-const getFileIcon = (type: string) => {
-  switch (type) {
-    case "pdf":
-    case "document":
-      return <FileText className="h-5 w-5 text-red-500" />;
-    case "image":
-      return <Image className="h-5 w-5 text-green-500" />;
-    case "presentation":
-      return <File className="h-5 w-5 text-orange-500" />;
-    case "spreadsheet":
-      return <File className="h-5 w-5 text-green-600" />;
-    default:
-      return <File className="h-5 w-5 text-gray-500" />;
-  }
-};
+// Removed per request: file-type icon for file names
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -431,10 +416,7 @@ export default function FilesPage() {
                       {file.id}
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        {getFileIcon(file.type)}
-                        <span className="font-medium">{file.name}</span>
-                      </div>
+                      <span className="font-medium">{file.name}</span>
                     </TableCell>
                     <TableCell className="text-sm text-gray-600 dark:text-gray-400">
                       {file.size}
